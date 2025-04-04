@@ -1,9 +1,9 @@
 from flask import Flask, request, jsonify
 import sqlite3
-
+from flask_cors import CORS
 
 app = Flask (__name__)
-
+CORS(app)
 
 def init_db():
    with sqlite3.connect('database.db') as conn:
@@ -21,7 +21,7 @@ init_db()
 
 @app.route('/')
 def homapage():
-    return '<h2>Bem vindo a minha API de livros</h2>'
+    return '<h2>Bem vindo a API de Livros VNW</h2>'
 
 @app.route("/doar", methods=['POST'])
 def doar():
@@ -63,6 +63,18 @@ def listar_livros():
          livros_formatados.append(dicionario_livros)
          
      return jsonify(livros_formatados)
+
+@app.route('/livros/<int:livro_id>', methods=['DELETE'])
+def deletar_livro(livro_id):
+    with sqlite3.connect('database.db') as conn:
+          conexao_cursor = conn.cursor()
+          conexao_cursor.execute("DELETE FROM livros WHERE id=?", (livro_id,))
+          conn.commit()
+    
+    if conexao_cursor.rowcount == 0:
+        return jsonify({"erro": "Livro não encontrado"}), 400
+    
+    return jsonify({"mensagem": "Livro excluído com sucesso"}), 200  
     
 
 if __name__ == "__main__":
